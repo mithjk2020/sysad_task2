@@ -1,0 +1,27 @@
+services:
+  server:
+    container_name: gemini
+    build: 
+      context: .
+      dockerfile: Dockerfile_database
+    ports:
+      - "80:80"
+    volumes:
+      - shared-data:/cont/dbsql
+
+  db:
+    container_name: database
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=gemini
+      - MYSQL_USER=gemini_user
+      - MYSQL_PASSWORD=1234
+      - MYSQL_ROOT_PASSWORD=root1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - shared-data:/cont/dbsql
+    command: bash -c "while [ ! -f /cont/dbsql/gemini.sql ]; do echo 'waiting for gemini.sql..'; sleep 2; done; cp /cont/dbsql/gemini.sql /docker-entrypoint-initdb.d/ && docker-entrypoint.sh mysqld"
+
+volumes:
+  shared-data:
