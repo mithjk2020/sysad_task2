@@ -8,20 +8,32 @@ services:
       - "80:80"
     volumes:
       - shared-data:/cont/dbsql
+      - ./src:/cont/src
+      - /home/admin/mentees:/mnt/mentees
 
   db:
     container_name: database
     image: mysql:latest
     environment:
       - MYSQL_DATABASE=gemini
-      - MYSQL_USER=gemini_user
+      - MYSQL_USER=root
       - MYSQL_PASSWORD=1234
       - MYSQL_ROOT_PASSWORD=root1234
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - shared-data:/cont/dbsql
     command: bash -c "while [ ! -f /cont/dbsql/gemini.sql ]; do echo 'waiting for gemini.sql..'; sleep 2; done; cp /cont/dbsql/gemini.sql /docker-entrypoint-initdb.d/ && docker-entrypoint.sh mysqld"
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_USER=gemini_user
+      - PMA_PASSWORD=1234
 
 volumes:
   shared-data:
